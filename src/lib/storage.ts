@@ -22,6 +22,6 @@ export function saveTasks(tasks: Task[]): void {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
   } catch {
-
+    // Storage unavailable: the app keeps working in memory.
   }
 }
