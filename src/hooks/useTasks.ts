@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useReducer } from 'react';
-import { loadTasks, saveTasks } from '../lib/storage';
+import { STORAGE_KEY, loadTasks, saveTasks, subscribeToStorage } from '../lib/storage';
 import { tasksReducer } from '../model/tasksReducer';
 import type { Task } from '../model/types';
 
@@ -17,6 +17,11 @@ export function useTasks(): UseTasksResult {
   useEffect(() => {
     saveTasks(tasks);
   }, [tasks]);
+
+  useEffect(
+    () => subscribeToStorage(STORAGE_KEY, () => dispatch({ type: 'replace', payload: { tasks: loadTasks() } })),
+    [],
+  );
 
   const addTask = useCallback((title: string) => {
     dispatch({

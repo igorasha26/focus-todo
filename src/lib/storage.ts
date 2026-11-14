@@ -14,7 +14,14 @@ export function loadTasks(): Task[] {
     if (!Array.isArray(parsed)) {
       return [];
     }
-    return parsed.filter(isTask);
+    const seenIds = new Set<string>();
+    return parsed.filter(isTask).filter((task) => {
+      if (seenIds.has(task.id)) {
+        return false;
+      }
+      seenIds.add(task.id);
+      return true;
+    });
   } catch {
     return [];
   }
@@ -60,4 +67,14 @@ export function saveTheme(theme: Theme): void {
   } catch {
     // localStorage недоступен — данные просто не сохранятся
   }
+}
+
+export function subscribeToStorage(key: string, onChange: () => void): () => void {
+  const handleStorage = (event: StorageEvent) => {
+    if (event.key === null || event.key === key) {
+      onChange();
+    }
+  };
+  window.addEventListener('storage', handleStorage);
+  return () => window.removeEventListener('storage', handleStorage);
 }

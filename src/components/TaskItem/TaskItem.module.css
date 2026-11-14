@@ -30,6 +30,7 @@
 }
 
 .checkbox {
+  position: relative;
   appearance: none;
   flex-shrink: 0;
   display: grid;
@@ -44,6 +45,12 @@
     background-color var(--transition),
     border-color var(--transition),
     transform var(--transition);
+}
+
+.checkbox::before {
+  content: '';
+  position: absolute;
+  inset: -13px;
 }
 
 .checkbox:hover {
@@ -99,6 +106,7 @@
 }
 
 .remove {
+  position: relative;
   flex-shrink: 0;
   display: grid;
   place-content: center;
@@ -110,6 +118,13 @@
     color var(--transition),
     background-color var(--transition),
     transform var(--transition);
+}
+
+.remove::before {
+  /* Invisible tap area: at least 44x44 without changing the visual size. */
+  content: '';
+  position: absolute;
+  inset: -5px;
 }
 
 .remove:hover,

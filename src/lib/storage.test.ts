@@ -9,7 +9,9 @@ import {
   saveFilter,
   saveTasks,
   saveTheme,
+  subscribeToStorage,
 } from './storage';
+import { changeStorageInOtherTab } from '../test/storageEvent';
 
 const validTask: Task = {
   id: '1',
@@ -43,6 +45,8 @@ describe('storage', () => {
     ['null entry', null],
     ['a task without id', { ...validTask, id: undefined }],
     ['a task with an empty id', { ...validTask, id: '' }],
+    ['a task with an empty title', { ...validTask, id: 'e', title: '' }],
+    ['a task with a whitespace-only title', { ...validTask, id: 'w', title: '   ' }],
     ['a task with a wrong completed type', { ...validTask, completed: 'yes' }],
     ['a task with a non-numeric createdAt', { ...validTask, createdAt: '2024-01-01' }],
   ])('drops an invalid entry and keeps the valid ones: %s', (_label, broken) => {
@@ -156,5 +160,42 @@ describe('theme storage', () => {
     });
     expect(() => saveTheme('dark')).not.toThrow();
     spy.mockRestore();
+  });
+});
+
+describe('loadTasks: duplicate ids', () => {
+  it('keeps the first task for a repeated id and drops the rest', () => {
+    const first: Task = { ...validTask, id: 'dup', title: 'Первая' };
+    const copy: Task = { ...validTask, id: 'dup', title: 'Копия', completed: true };
+    const other: Task = { ...validTask, id: 'other', title: 'Другая' };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify([first, other, copy]));
+    expect(loadTasks()).toEqual([first, other]);
+  });
+
+  it('checks duplicates only among valid tasks', () => {
+    const broken = { id: 'dup', title: '' };
+    const valid: Task = { ...validTask, id: 'dup', title: 'Нормальная' };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify([broken, valid]));
+    expect(loadTasks()).toEqual([valid]);
+  });
+});
+
+describe('subscribeToStorage', () => {
+  it('fires for its key and for a full clear, ignores other keys', () => {
+    const onChange = vi.fn();
+    const unsubscribe = subscribeToStorage(STORAGE_KEY, onChange);
+
+    changeStorageInOtherTab(FILTER_STORAGE_KEY, 'active');
+    expect(onChange).not.toHaveBeenCalled();
+
+    changeStorageInOtherTab(STORAGE_KEY, '[]');
+    expect(onChange).toHaveBeenCalledTimes(1);
+
+    changeStorageInOtherTab(null, null);
+    expect(onChange).toHaveBeenCalledTimes(2);
+
+    unsubscribe();
+    changeStorageInOtherTab(STORAGE_KEY, '[]');
+    expect(onChange).toHaveBeenCalledTimes(2);
   });
 });

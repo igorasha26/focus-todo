@@ -1,6 +1,7 @@
-import { render, screen, within, type RenderResult } from '@testing-library/react';
+import { act, render, screen, within, type RenderResult } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { FILTER_STORAGE_KEY, STORAGE_KEY } from './lib/storage';
+import { changeStorageInOtherTab } from './test/storageEvent';
 import { App } from './App';
 
 describe('App', () => {
@@ -258,5 +259,82 @@ describe('App: keyboard focus', () => {
     await user.click(screen.getByRole('checkbox', { name: 'Готово' }));
     await user.click(screen.getByRole('button', { name: 'Очистить выполненные' }));
     expect(taskInput()).toHaveFocus();
+  });
+});
+
+describe('App: focus after a task leaves the current filter', () => {
+  const checkbox = (title: string) => screen.getByRole('checkbox', { name: title });
+  const taskInput = () => screen.getByRole('textbox', { name: 'Новая задача' });
+
+  // Tasks are prepended, so adding А, Б, В renders them as В, Б, А.
+  it('moves focus to the next task’s checkbox', async () => {
+    const { user } = renderApp();
+    await addTasks(user, ['А', 'Б', 'В']);
+    await user.click(filterButton('Активные задачи'));
+    await user.click(checkbox('В'));
+    expect(checkbox('Б')).toHaveFocus();
+  });
+
+  it('moves focus to the previous task’s checkbox when the last one leaves', async () => {
+    const { user } = renderApp();
+    await addTasks(user, ['А', 'Б', 'В']);
+    await user.click(filterButton('Активные задачи'));
+    await user.click(checkbox('А'));
+    expect(checkbox('Б')).toHaveFocus();
+  });
+
+  it('moves focus to the input when no tasks are left in the filter', async () => {
+    const { user } = renderApp();
+    await addTasks(user, ['Одна']);
+    await user.click(filterButton('Активные задачи'));
+    await user.click(checkbox('Одна'));
+    expect(screen.getByText('Все задачи выполнены')).toBeInTheDocument();
+    expect(taskInput()).toHaveFocus();
+  });
+
+  it('works on the "completed" filter too (unchecking)', async () => {
+    const { user } = renderApp();
+    await addTasks(user, ['А', 'Б']);
+    await user.click(checkbox('А'));
+    await user.click(checkbox('Б'));
+    await user.click(filterButton('Выполненные задачи'));
+    await user.click(checkbox('Б'));
+    expect(checkbox('А')).toHaveFocus();
+  });
+
+  it('keeps focus on the checkbox when the task stays visible', async () => {
+    const { user } = renderApp();
+    await addTasks(user, ['А', 'Б']);
+    await user.click(checkbox('А'));
+    expect(checkbox('А')).toHaveFocus();
+    expect(checkbox('А')).toBeChecked();
+  });
+
+  it('works with the keyboard (Space on a focused checkbox)', async () => {
+    const { user } = renderApp();
+    await addTasks(user, ['А', 'Б']);
+    await user.click(filterButton('Активные задачи'));
+    checkbox('Б').focus();
+    await user.keyboard(' ');
+    expect(checkbox('А')).toHaveFocus();
+  });
+});
+
+describe('App: sync with other tabs', () => {
+  it('shows tasks, filter and counter changed in another tab', async () => {
+    const { user } = renderApp();
+    await addTasks(user, ['Локальная']);
+
+    const remote = [
+      { id: 'r1', title: 'Из другой вкладки', completed: true, createdAt: 2 },
+      { id: 'r2', title: 'Ещё одна', completed: false, createdAt: 1 },
+    ];
+    act(() => changeStorageInOtherTab(STORAGE_KEY, JSON.stringify(remote)));
+    expect(visibleTitles()).toEqual(['Из другой вкладки', 'Ещё одна']);
+    expect(screen.getByText('Вы выполнили 1/2 задач')).toBeInTheDocument();
+
+    act(() => changeStorageInOtherTab(FILTER_STORAGE_KEY, 'completed'));
+    expect(filterButton('Выполненные задачи')).toHaveAttribute('aria-pressed', 'true');
+    expect(visibleTitles()).toEqual(['Из другой вкладки']);
   });
 });

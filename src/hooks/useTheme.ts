@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { loadTheme, saveTheme } from '../lib/storage';
+import { THEME_STORAGE_KEY, loadTheme, saveTheme, subscribeToStorage } from '../lib/storage';
 import type { Theme } from '../model/types';
 
 const DARK_QUERY = '(prefers-color-scheme: dark)';
@@ -29,6 +29,8 @@ export function useTheme(): UseThemeResult {
     query.addEventListener('change', handleChange);
     return () => query.removeEventListener('change', handleChange);
   }, []);
+
+  useEffect(() => subscribeToStorage(THEME_STORAGE_KEY, () => setPreference(loadTheme())), []);
 
   useEffect(() => {
     const root = document.documentElement;

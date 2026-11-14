@@ -1,5 +1,6 @@
 import { act, renderHook } from '@testing-library/react';
 import { THEME_STORAGE_KEY } from '../lib/storage';
+import { changeStorageInOtherTab } from '../test/storageEvent';
 import { useTheme } from './useTheme';
 
 type ChangeListener = (event: MediaQueryListEvent) => void;
@@ -84,5 +85,27 @@ describe('useTheme', () => {
     vi.stubGlobal('matchMedia', undefined);
     const { result } = renderHook(() => useTheme());
     expect(result.current.theme).toBe('light');
+  });
+});
+
+describe('useTheme: other tabs', () => {
+  it('applies a theme chosen in another tab', () => {
+    mockSystemTheme(false);
+    const { result } = renderHook(() => useTheme());
+
+    act(() => changeStorageInOtherTab(THEME_STORAGE_KEY, 'dark'));
+    expect(result.current.theme).toBe('dark');
+    expect(document.documentElement).toHaveAttribute('data-theme', 'dark');
+  });
+
+  it('goes back to the system theme when another tab clears storage', () => {
+    localStorage.setItem(THEME_STORAGE_KEY, 'light');
+    mockSystemTheme(true);
+    const { result } = renderHook(() => useTheme());
+    expect(result.current.theme).toBe('light');
+
+    act(() => changeStorageInOtherTab(null, null));
+    expect(result.current.theme).toBe('dark');
+    expect(document.documentElement).not.toHaveAttribute('data-theme');
   });
 });

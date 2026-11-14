@@ -32,7 +32,7 @@ export function FilterBar({ value, onChange }: FilterBarProps) {
             aria-label={option.ariaLabel}
             onClick={() => onChange(option.value)}
           >
-            {option.label}
+            <span className={styles.label}>{option.label}</span>
           </button>
         );
       })}

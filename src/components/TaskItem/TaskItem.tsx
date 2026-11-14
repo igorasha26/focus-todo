@@ -5,16 +5,18 @@ interface TaskItemProps {
   task: Task;
   onToggle: (id: string) => void;
   onRemove: (id: string) => void;
+  checkboxRef?: (element: HTMLInputElement | null) => void;
   removeButtonRef?: (element: HTMLButtonElement | null) => void;
 }
 
-export function TaskItem({ task, onToggle, onRemove, removeButtonRef }: TaskItemProps) {
+export function TaskItem({ task, onToggle, onRemove, checkboxRef, removeButtonRef }: TaskItemProps) {
   const checkboxId = `task-${task.id}`;
   const cardClass = [styles.card, task.completed ? styles.completed : ''].join(' ');
 
   return (
     <li className={cardClass}>
       <input
+        ref={checkboxRef}
         id={checkboxId}
         className={styles.checkbox}
         type="checkbox"

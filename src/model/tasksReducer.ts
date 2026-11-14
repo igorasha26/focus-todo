@@ -4,7 +4,8 @@ export type TasksAction =
   | { type: 'add'; payload: { id: string; title: string; createdAt: number } }
   | { type: 'toggle'; payload: { id: string } }
   | { type: 'remove'; payload: { id: string } }
-  | { type: 'clearCompleted' };
+  | { type: 'clearCompleted' }
+  | { type: 'replace'; payload: { tasks: Task[] } };
 
 export function addTask(
   state: Task[],
@@ -40,6 +41,10 @@ export function clearCompleted(state: Task[]): Task[] {
   return next.length === state.length ? state : next;
 }
 
+export function replaceTasks(_state: Task[], tasks: Task[]): Task[] {
+  return tasks;
+}
+
 export function tasksReducer(state: Task[], action: TasksAction): Task[] {
   switch (action.type) {
     case 'add':
@@ -50,6 +55,8 @@ export function tasksReducer(state: Task[], action: TasksAction): Task[] {
       return removeTask(state, action.payload.id);
     case 'clearCompleted':
       return clearCompleted(state);
+    case 'replace':
+      return replaceTasks(state, action.payload.tasks);
     default: {
       const exhaustive: never = action;
       return exhaustive;

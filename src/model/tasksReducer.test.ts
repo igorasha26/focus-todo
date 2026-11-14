@@ -2,6 +2,7 @@ import {
   addTask,
   clearCompleted,
   removeTask,
+  replaceTasks,
   tasksReducer,
   toggleTask,
 } from './tasksReducer';
@@ -89,5 +90,16 @@ describe('tasksReducer', () => {
 
     state = tasksReducer(state, { type: 'remove', payload: { id: 'y' } });
     expect(state).toEqual([]);
+
+    state = tasksReducer(state, { type: 'replace', payload: { tasks: initial } });
+    expect(state).toBe(initial);
+  });
+});
+
+describe('replaceTasks', () => {
+  it('returns the given list as the new state', () => {
+    const next = [c];
+    expect(replaceTasks(initial, next)).toBe(next);
+    expect(replaceTasks(initial, [])).toEqual([]);
   });
 });

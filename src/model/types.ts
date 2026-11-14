@@ -16,13 +16,14 @@ export function isTask(value: unknown): value is Task {
     typeof candidate.id === 'string' &&
     candidate.id.length > 0 &&
     typeof candidate.title === 'string' &&
+    candidate.title.trim() !== '' &&
     typeof candidate.completed === 'boolean' &&
     typeof candidate.createdAt === 'number' &&
     Number.isFinite(candidate.createdAt)
   );
 }
 
-export const FILTERS: readonly Filter[] = ['all', 'active', 'completed'];
+const FILTERS: readonly Filter[] = ['all', 'active', 'completed'];
 
 export function isFilter(value: unknown): value is Filter {
   return typeof value === 'string' && (FILTERS as readonly string[]).includes(value);

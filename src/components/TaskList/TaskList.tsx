@@ -11,10 +11,17 @@ interface TaskListProps {
   focusFallbackRef: RefObject<HTMLElement>;
 }
 
-export function TaskList({ tasks, emptyMessage, onToggle, onRemove, focusFallbackRef }: TaskListProps) {
-  const removeButtons = useRef(new Map<string, HTMLButtonElement>());
+type Control = 'checkbox' | 'remove';
 
-  const pendingFocus = useRef<{ id: string | null } | null>(null);
+interface PendingFocus {
+  taskId: string;
+  control: Control;
+  neighbourIds: string[];
+}
+
+export function TaskList({ tasks, emptyMessage, onToggle, onRemove, focusFallbackRef }: TaskListProps) {
+  const controls = useRef(new Map<string, HTMLElement>());
+  const pendingFocus = useRef<PendingFocus | null>(null);
 
   useEffect(() => {
     const pending = pendingFocus.current;
@@ -22,22 +29,39 @@ export function TaskList({ tasks, emptyMessage, onToggle, onRemove, focusFallbac
       return;
     }
     pendingFocus.current = null;
-    const target = pending.id === null ? undefined : removeButtons.current.get(pending.id);
+    if (tasks.some((task) => task.id === pending.taskId)) {
+      return;
+    }
+    const target = pending.neighbourIds
+      .map((id) => controls.current.get(`${pending.control}:${id}`))
+      .find((element) => element !== undefined);
     (target ?? focusFallbackRef.current)?.focus();
   }, [tasks, focusFallbackRef]);
 
+  const rememberFocus = (taskId: string, control: Control) => {
+    const index = tasks.findIndex((task) => task.id === taskId);
+    const neighbourIds = [tasks[index + 1], tasks[index - 1]]
+      .filter((task): task is Task => task !== undefined)
+      .map((task) => task.id);
+    pendingFocus.current = { taskId, control, neighbourIds };
+  };
+
+  const handleToggle = (id: string) => {
+    rememberFocus(id, 'checkbox');
+    onToggle(id);
+  };
+
   const handleRemove = (id: string) => {
-    const index = tasks.findIndex((task) => task.id === id);
-    const neighbour = tasks[index + 1] ?? tasks[index - 1];
-    pendingFocus.current = { id: neighbour?.id ?? null };
+    rememberFocus(id, 'remove');
     onRemove(id);
   };
 
-  const registerRemoveButton = (id: string) => (element: HTMLButtonElement | null) => {
+  const registerControl = (control: Control, id: string) => (element: HTMLElement | null) => {
+    const key = `${control}:${id}`;
     if (element) {
-      removeButtons.current.set(id, element);
+      controls.current.set(key, element);
     } else {
-      removeButtons.current.delete(id);
+      controls.current.delete(key);
     }
   };
 
@@ -51,9 +75,10 @@ export function TaskList({ tasks, emptyMessage, onToggle, onRemove, focusFallbac
         <TaskItem
           key={task.id}
           task={task}
-          onToggle={onToggle}
+          onToggle={handleToggle}
           onRemove={handleRemove}
-          removeButtonRef={registerRemoveButton(task.id)}
+          checkboxRef={registerControl('checkbox', task.id)}
+          removeButtonRef={registerControl('remove', task.id)}
         />
       ))}
     </ul>

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { loadFilter, saveFilter } from '../lib/storage';
+import { FILTER_STORAGE_KEY, loadFilter, saveFilter, subscribeToStorage } from '../lib/storage';
 import type { Filter } from '../model/types';
 
 export function useFilter(): [Filter, (filter: Filter) => void] {
@@ -8,6 +8,8 @@ export function useFilter(): [Filter, (filter: Filter) => void] {
   useEffect(() => {
     saveFilter(filter);
   }, [filter]);
+
+  useEffect(() => subscribeToStorage(FILTER_STORAGE_KEY, () => setFilter(loadFilter())), []);
 
   return [filter, setFilter];
 }
