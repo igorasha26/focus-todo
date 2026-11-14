@@ -11,7 +11,9 @@
 
 .form:focus-within {
   border-color: var(--color-accent);
-  box-shadow: 0 0 0 4px var(--color-focus);
+  box-shadow:
+    0 0 0 1px var(--color-accent),
+    0 0 0 4px var(--color-focus);
 }
 
 .input {
@@ -39,11 +41,18 @@
   color: var(--color-accent-contrast);
   background: var(--color-accent);
   border-radius: var(--radius-sm);
-  transition: background-color var(--transition), opacity var(--transition);
+  transition:
+    background-color var(--transition),
+    opacity var(--transition),
+    transform var(--transition);
 }
 
 .button:hover:not(:disabled) {
   background: var(--color-accent-hover);
+}
+
+.button:active:not(:disabled) {
+  transform: scale(0.97);
 }
 
 .button:disabled {

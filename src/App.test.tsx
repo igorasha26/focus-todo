@@ -40,7 +40,7 @@ describe('App', () => {
     const item = checkbox.closest('li');
     if (!item) throw new Error('list item not found');
     await user.click(within(item).getByRole('button', { name: 'Удалить задачу «Купить молоко»' }));
-    expect(screen.queryByText('Купить молоко')).not.toBeInTheDocument();
+    expect(screen.queryByRole('checkbox', { name: 'Купить молоко' })).not.toBeInTheDocument();
     expect(screen.getAllByRole('listitem')).toHaveLength(1);
   });
 
@@ -184,5 +184,79 @@ describe('App: summary', () => {
     expect(clear).toBeDisabled();
     const stored: unknown = JSON.parse(localStorage.getItem(STORAGE_KEY) ?? '[]');
     expect(stored).toHaveLength(1);
+  });
+});
+
+describe('App: theme toggle', () => {
+  afterEach(() => {
+    delete document.documentElement.dataset.theme;
+  });
+
+  it('switches the theme from the header button and remembers it', async () => {
+    const { user } = renderApp();
+    await user.click(screen.getByRole('button', { name: 'Включить тёмную тему' }));
+    expect(document.documentElement).toHaveAttribute('data-theme', 'dark');
+    expect(screen.getByRole('button', { name: 'Включить светлую тему' })).toBeInTheDocument();
+    expect(localStorage.getItem('focus-todo:theme')).toBe('dark');
+  });
+});
+
+describe('App: keyboard focus', () => {
+  const removeButton = (title: string) => screen.getByRole('button', { name: `Удалить задачу «${title}»` });
+  const taskInput = () => screen.getByRole('textbox', { name: 'Новая задача' });
+
+  it('focuses the task input on load', () => {
+    renderApp();
+    expect(taskInput()).toHaveFocus();
+  });
+
+  it('keeps focus in the input after adding via Enter or the button', async () => {
+    const { user } = renderApp();
+    await user.type(taskInput(), 'Через Enter{Enter}');
+    expect(taskInput()).toHaveFocus();
+
+    await user.type(taskInput(), 'Через кнопку');
+    await user.click(screen.getByRole('button', { name: 'Добавить задачу' }));
+    expect(taskInput()).toHaveFocus();
+  });
+
+  // Tasks are prepended, so adding А, Б, В renders them as В, Б, А.
+  it('moves focus to the next task’s delete button after removing', async () => {
+    const { user } = renderApp();
+    await addTasks(user, ['А', 'Б', 'В']);
+    await user.click(removeButton('В'));
+    expect(removeButton('Б')).toHaveFocus();
+  });
+
+  it('moves focus to the previous task’s delete button when removing the last one', async () => {
+    const { user } = renderApp();
+    await addTasks(user, ['А', 'Б', 'В']);
+    await user.click(removeButton('А'));
+    expect(removeButton('Б')).toHaveFocus();
+  });
+
+  it('moves focus to the input when the only task is removed', async () => {
+    const { user } = renderApp();
+    await addTasks(user, ['Единственная']);
+    await user.click(removeButton('Единственная'));
+    expect(taskInput()).toHaveFocus();
+  });
+
+  it('works with the keyboard: Enter on a focused delete button', async () => {
+    const { user } = renderApp();
+    await addTasks(user, ['А', 'Б']);
+    removeButton('Б').focus();
+    await user.keyboard('{Enter}');
+    expect(removeButton('А')).toHaveFocus();
+    await user.keyboard('{Enter}');
+    expect(taskInput()).toHaveFocus();
+  });
+
+  it('moves focus to the input after clearing completed tasks', async () => {
+    const { user } = renderApp();
+    await addTasks(user, ['Готово', 'Не готово']);
+    await user.click(screen.getByRole('checkbox', { name: 'Готово' }));
+    await user.click(screen.getByRole('button', { name: 'Очистить выполненные' }));
+    expect(taskInput()).toHaveFocus();
   });
 });

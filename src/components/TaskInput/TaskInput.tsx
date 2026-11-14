@@ -1,11 +1,12 @@
-import { useState, type FormEvent } from 'react';
+import { useState, type FormEvent, type RefObject } from 'react';
 import styles from './TaskInput.module.css';
 
 interface TaskInputProps {
   onAdd: (title: string) => void;
+  inputRef: RefObject<HTMLInputElement>;
 }
 
-export function TaskInput({ onAdd }: TaskInputProps) {
+export function TaskInput({ onAdd, inputRef }: TaskInputProps) {
   const [value, setValue] = useState('');
   const isEmpty = value.trim() === '';
 
@@ -16,11 +17,13 @@ export function TaskInput({ onAdd }: TaskInputProps) {
     }
     onAdd(value.trim());
     setValue('');
+    inputRef.current?.focus();
   };
 
   return (
     <form className={styles.form} onSubmit={handleSubmit}>
       <input
+        ref={inputRef}
         className={styles.input}
         type="text"
         value={value}
@@ -29,6 +32,7 @@ export function TaskInput({ onAdd }: TaskInputProps) {
         aria-label="Новая задача"
         autoComplete="off"
         maxLength={200}
+        autoFocus
       />
       <button className={styles.button} type="submit" disabled={isEmpty} aria-label="Добавить задачу">
         Добавить

@@ -10,4 +10,11 @@
   color: var(--color-text-muted);
   border: 1px dashed var(--color-border);
   border-radius: var(--radius);
+  animation: fade-in 200ms ease both;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
 }

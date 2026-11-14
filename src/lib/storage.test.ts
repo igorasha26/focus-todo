@@ -1,5 +1,15 @@
 import type { Task } from '../model/types';
-import { FILTER_STORAGE_KEY, STORAGE_KEY, loadFilter, loadTasks, saveFilter, saveTasks } from './storage';
+import {
+  FILTER_STORAGE_KEY,
+  STORAGE_KEY,
+  THEME_STORAGE_KEY,
+  loadFilter,
+  loadTasks,
+  loadTheme,
+  saveFilter,
+  saveTasks,
+  saveTheme,
+} from './storage';
 
 const validTask: Task = {
   id: '1',
@@ -112,6 +122,39 @@ describe('filter storage', () => {
       throw new Error('QuotaExceededError');
     });
     expect(() => saveFilter('active')).not.toThrow();
+    spy.mockRestore();
+  });
+});
+
+describe('theme storage', () => {
+  it('returns null (follow the system) when nothing is stored', () => {
+    expect(loadTheme()).toBeNull();
+  });
+
+  it.each(['blue', '', 'DARK', '"dark"'])('returns null for an unknown value: %j', (raw) => {
+    localStorage.setItem(THEME_STORAGE_KEY, raw);
+    expect(loadTheme()).toBeNull();
+  });
+
+  it.each(['light', 'dark'] as const)('round-trips "%s"', (theme) => {
+    saveTheme(theme);
+    expect(localStorage.getItem(THEME_STORAGE_KEY)).toBe(theme);
+    expect(loadTheme()).toBe(theme);
+  });
+
+  it('returns null when localStorage throws on read', () => {
+    const spy = vi.spyOn(Storage.prototype, 'getItem').mockImplementation(() => {
+      throw new Error('SecurityError');
+    });
+    expect(loadTheme()).toBeNull();
+    spy.mockRestore();
+  });
+
+  it('does not throw when localStorage throws on write', () => {
+    const spy = vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
+      throw new Error('QuotaExceededError');
+    });
+    expect(() => saveTheme('dark')).not.toThrow();
     spy.mockRestore();
   });
 });

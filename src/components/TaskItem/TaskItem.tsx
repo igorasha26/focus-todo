@@ -5,13 +5,15 @@ interface TaskItemProps {
   task: Task;
   onToggle: (id: string) => void;
   onRemove: (id: string) => void;
+  removeButtonRef?: (element: HTMLButtonElement | null) => void;
 }
 
-export function TaskItem({ task, onToggle, onRemove }: TaskItemProps) {
+export function TaskItem({ task, onToggle, onRemove, removeButtonRef }: TaskItemProps) {
   const checkboxId = `task-${task.id}`;
+  const cardClass = [styles.card, task.completed ? styles.completed : ''].join(' ');
 
   return (
-    <li className={`${styles.item} ${task.completed ? styles.completed : ''}`}>
+    <li className={cardClass}>
       <input
         id={checkboxId}
         className={styles.checkbox}
@@ -23,6 +25,7 @@ export function TaskItem({ task, onToggle, onRemove }: TaskItemProps) {
         {task.title}
       </label>
       <button
+        ref={removeButtonRef}
         className={styles.remove}
         type="button"
         onClick={() => onRemove(task.id)}

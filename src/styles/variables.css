@@ -19,6 +19,7 @@
 
   /* Motion */
   --transition: 150ms ease;
+  --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
 
   /* Light theme (default) */
   color-scheme: light;
@@ -26,13 +27,14 @@
   --color-surface: #ffffff;
   --color-surface-hover: #f1f3f6;
   --color-border: #e3e6eb;
+  --color-border-strong: #858c98;
   --color-text: #1c1f24;
-  --color-text-muted: #6b7280;
-  --color-accent: #4f6bed;
-  --color-accent-hover: #3d58d6;
+  --color-text-muted: #626976;
+  --color-accent: #4059d9;
+  --color-accent-hover: #3447b8;
   --color-accent-contrast: #ffffff;
   --color-danger: #dc4a4a;
-  --color-focus: rgb(79 107 237 / 0.45);
+  --color-focus: rgb(64 89 217 / 0.4);
   --shadow-sm: 0 1px 2px rgb(16 24 40 / 0.06);
   --shadow-md: 0 4px 16px rgb(16 24 40 / 0.08);
 }
@@ -44,6 +46,7 @@
     --color-surface: #1b1e24;
     --color-surface-hover: #23272f;
     --color-border: #2e333c;
+    --color-border-strong: #666d7a;
     --color-text: #e8eaee;
     --color-text-muted: #9aa1ad;
     --color-accent: #7b91ff;
@@ -62,6 +65,7 @@
   --color-surface: #1b1e24;
   --color-surface-hover: #23272f;
   --color-border: #2e333c;
+  --color-border-strong: #666d7a;
   --color-text: #e8eaee;
   --color-text-muted: #9aa1ad;
   --color-accent: #7b91ff;

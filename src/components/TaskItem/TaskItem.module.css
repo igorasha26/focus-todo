@@ -1,4 +1,11 @@
-.item {
+@keyframes enter {
+  from {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.98);
+  }
+}
+
+.card {
   display: flex;
   align-items: center;
   gap: var(--space-3);
@@ -7,11 +14,19 @@
   border: 1px solid var(--color-border);
   border-radius: var(--radius);
   box-shadow: var(--shadow-sm);
-  transition: box-shadow var(--transition), opacity var(--transition);
+  animation: enter 260ms var(--ease-out) both;
+  transition:
+    box-shadow var(--transition),
+    border-color var(--transition),
+    background-color var(--transition);
 }
 
-.item:hover {
+.card:hover {
   box-shadow: var(--shadow-md);
+}
+
+.card:focus-within {
+  border-color: var(--color-border-strong);
 }
 
 .checkbox {
@@ -21,15 +36,26 @@
   place-content: center;
   width: 22px;
   height: 22px;
-  border: 2px solid var(--color-border);
+  border: 2px solid var(--color-border-strong);
   border-radius: 50%;
   background: var(--color-surface);
   cursor: pointer;
-  transition: background-color var(--transition), border-color var(--transition);
+  transition:
+    background-color var(--transition),
+    border-color var(--transition),
+    transform var(--transition);
 }
 
 .checkbox:hover {
   border-color: var(--color-accent);
+}
+
+.checkbox:active {
+  transform: scale(0.9);
+}
+
+.checkbox:focus-visible {
+  outline-offset: 3px;
 }
 
 .checkbox::after {
@@ -40,7 +66,7 @@
   border-left: 2px solid var(--color-accent-contrast);
   border-bottom: 2px solid var(--color-accent-contrast);
   transform: rotate(-45deg) scale(0);
-  transition: transform var(--transition);
+  transition: transform 200ms var(--ease-out);
 }
 
 .checkbox:checked {
@@ -57,7 +83,10 @@
   min-width: 0;
   overflow-wrap: anywhere;
   cursor: pointer;
-  transition: color var(--transition);
+  text-decoration: line-through transparent;
+  transition:
+    color var(--transition),
+    text-decoration-color var(--transition);
 }
 
 .completed {
@@ -66,21 +95,29 @@
 
 .completed .title {
   color: var(--color-text-muted);
-  text-decoration: line-through;
+  text-decoration-color: currentColor;
 }
 
 .remove {
   flex-shrink: 0;
   display: grid;
   place-content: center;
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
   color: var(--color-text-muted);
   border-radius: var(--radius-sm);
-  transition: color var(--transition), background-color var(--transition);
+  transition:
+    color var(--transition),
+    background-color var(--transition),
+    transform var(--transition);
 }
 
-.remove:hover {
+.remove:hover,
+.remove:focus-visible {
   color: var(--color-danger);
   background: var(--color-surface-hover);
+}
+
+.remove:active {
+  transform: scale(0.92);
 }

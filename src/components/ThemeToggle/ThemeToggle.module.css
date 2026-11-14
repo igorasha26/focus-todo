@@ -1,0 +1,37 @@
+.toggle {
+  flex-shrink: 0;
+  display: grid;
+  place-content: center;
+  width: 40px;
+  height: 40px;
+  color: var(--color-text-muted);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  transition:
+    color var(--transition),
+    background-color var(--transition),
+    border-color var(--transition),
+    transform var(--transition);
+}
+
+.toggle:hover {
+  color: var(--color-text);
+  background: var(--color-surface-hover);
+}
+
+.toggle:active {
+  transform: scale(0.94);
+}
+
+.icon {
+  animation: spin-in 300ms var(--ease-out);
+}
+
+@keyframes spin-in {
+  from {
+    opacity: 0;
+    transform: rotate(-90deg) scale(0.6);
+  }
+}
