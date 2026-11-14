@@ -12,3 +12,9 @@
   font-weight: 700;
   letter-spacing: -0.02em;
 }
+
+.compose {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}

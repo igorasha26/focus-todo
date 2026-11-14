@@ -1,10 +1,8 @@
 import {
   addTask,
   clearCompleted,
-  editTask,
   reorderTasks,
   removeTask,
-  setTaskPriority,
   tasksReducer,
   toggleTask,
 } from './tasksReducer';
@@ -14,7 +12,6 @@ function makeTask(overrides: Partial<Task> & Pick<Task, 'id'>): Task {
   return {
     title: `Задача ${overrides.id}`,
     completed: false,
-    priority: 'medium',
     createdAt: 1_700_000_000_000,
     ...overrides,
   };
@@ -22,24 +19,24 @@ function makeTask(overrides: Partial<Task> & Pick<Task, 'id'>): Task {
 
 const a = makeTask({ id: 'a' });
 const b = makeTask({ id: 'b', completed: true });
-const c = makeTask({ id: 'c', priority: 'high' });
+const c = makeTask({ id: 'c' });
 const initial: Task[] = [a, b, c];
 
 describe('addTask', () => {
   it('prepends a new active task with a trimmed title', () => {
-    const next = addTask(initial, { id: 'n', title: '  Купить молоко  ', priority: 'low', createdAt: 42 });
+    const next = addTask(initial, { id: 'n', title: '  Купить молоко  ', createdAt: 42 });
     expect(next).toHaveLength(4);
-    expect(next[0]).toEqual({ id: 'n', title: 'Купить молоко', completed: false, priority: 'low', createdAt: 42 });
+    expect(next[0]).toEqual({ id: 'n', title: 'Купить молоко', completed: false, createdAt: 42 });
     expect(next.slice(1)).toEqual(initial);
   });
 
   it('ignores a blank title', () => {
-    expect(addTask(initial, { id: 'n', title: '   ', priority: 'low', createdAt: 42 })).toBe(initial);
+    expect(addTask(initial, { id: 'n', title: '   ', createdAt: 42 })).toBe(initial);
   });
 
   it('does not mutate the original state', () => {
     const snapshot = structuredClone(initial);
-    addTask(initial, { id: 'n', title: 'Новая', priority: 'low', createdAt: 42 });
+    addTask(initial, { id: 'n', title: 'Новая', createdAt: 42 });
     expect(initial).toEqual(snapshot);
   });
 });
@@ -65,42 +62,6 @@ describe('removeTask', () => {
 
   it('returns the same state for an unknown id', () => {
     expect(removeTask(initial, 'missing')).toBe(initial);
-  });
-});
-
-describe('editTask', () => {
-  it('updates the title with trimming', () => {
-    const next = editTask(initial, 'c', '  Новое название ');
-    expect(next[2]).toEqual({ ...c, title: 'Новое название' });
-    expect(next[0]).toBe(a);
-  });
-
-  it('treats a blank title as cancel', () => {
-    expect(editTask(initial, 'c', '   ')).toBe(initial);
-  });
-
-  it('returns the same state when the title is unchanged', () => {
-    expect(editTask(initial, 'a', ` ${a.title} `)).toBe(initial);
-  });
-
-  it('returns the same state for an unknown id', () => {
-    expect(editTask(initial, 'missing', 'Текст')).toBe(initial);
-  });
-});
-
-describe('setTaskPriority', () => {
-  it('changes the priority of the matching task', () => {
-    const next = setTaskPriority(initial, 'a', 'high');
-    expect(next[0]).toEqual({ ...a, priority: 'high' });
-    expect(next[1]).toBe(b);
-  });
-
-  it('returns the same state when the priority is unchanged', () => {
-    expect(setTaskPriority(initial, 'c', 'high')).toBe(initial);
-  });
-
-  it('returns the same state for an unknown id', () => {
-    expect(setTaskPriority(initial, 'missing', 'low')).toBe(initial);
   });
 });
 
@@ -136,18 +97,12 @@ describe('clearCompleted', () => {
 
 describe('tasksReducer', () => {
   it('dispatches every action type to its handler', () => {
-    let state = tasksReducer([], { type: 'add', payload: { id: 'x', title: 'Первая', priority: 'medium', createdAt: 1 } });
-    state = tasksReducer(state, { type: 'add', payload: { id: 'y', title: 'Вторая', priority: 'low', createdAt: 2 } });
+    let state = tasksReducer([], { type: 'add', payload: { id: 'x', title: 'Первая', createdAt: 1 } });
+    state = tasksReducer(state, { type: 'add', payload: { id: 'y', title: 'Вторая', createdAt: 2 } });
     expect(state.map((t) => t.id)).toEqual(['y', 'x']);
 
     state = tasksReducer(state, { type: 'toggle', payload: { id: 'x' } });
     expect(state[1]?.completed).toBe(true);
-
-    state = tasksReducer(state, { type: 'edit', payload: { id: 'y', title: 'Вторая (изм.)' } });
-    expect(state[0]?.title).toBe('Вторая (изм.)');
-
-    state = tasksReducer(state, { type: 'setPriority', payload: { id: 'y', priority: 'high' } });
-    expect(state[0]?.priority).toBe('high');
 
     state = tasksReducer(state, { type: 'reorder', payload: { activeId: 'y', overId: 'x' } });
     expect(state.map((t) => t.id)).toEqual(['x', 'y']);

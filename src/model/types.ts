@@ -1,20 +1,11 @@
-export type Priority = 'low' | 'medium' | 'high';
-
 export interface Task {
   id: string;
   title: string;
   completed: boolean;
-  priority: Priority;
   createdAt: number;
 }
 
 export type Filter = 'all' | 'active' | 'completed';
-
-export const PRIORITIES: readonly Priority[] = ['low', 'medium', 'high'];
-
-export function isPriority(value: unknown): value is Priority {
-  return typeof value === 'string' && (PRIORITIES as readonly string[]).includes(value);
-}
 
 export function isTask(value: unknown): value is Task {
   if (typeof value !== 'object' || value === null) {
@@ -26,8 +17,13 @@ export function isTask(value: unknown): value is Task {
     candidate.id.length > 0 &&
     typeof candidate.title === 'string' &&
     typeof candidate.completed === 'boolean' &&
-    isPriority(candidate.priority) &&
     typeof candidate.createdAt === 'number' &&
     Number.isFinite(candidate.createdAt)
   );
+}
+
+export const FILTERS: readonly Filter[] = ['all', 'active', 'completed'];
+
+export function isFilter(value: unknown): value is Filter {
+  return typeof value === 'string' && (FILTERS as readonly string[]).includes(value);
 }

@@ -32,9 +32,6 @@
   --color-accent-hover: #3d58d6;
   --color-accent-contrast: #ffffff;
   --color-danger: #dc4a4a;
-  --color-priority-low: #4caf7a;
-  --color-priority-medium: #e0a030;
-  --color-priority-high: #dc4a4a;
   --color-focus: rgb(79 107 237 / 0.45);
   --shadow-sm: 0 1px 2px rgb(16 24 40 / 0.06);
   --shadow-md: 0 4px 16px rgb(16 24 40 / 0.08);
@@ -53,9 +50,6 @@
     --color-accent-hover: #93a5ff;
     --color-accent-contrast: #0e1016;
     --color-danger: #f07070;
-    --color-priority-low: #5fc48c;
-    --color-priority-medium: #e8b04a;
-    --color-priority-high: #f07070;
     --color-focus: rgb(123 145 255 / 0.5);
     --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.4);
     --shadow-md: 0 4px 16px rgb(0 0 0 / 0.35);
@@ -74,9 +68,6 @@
   --color-accent-hover: #93a5ff;
   --color-accent-contrast: #0e1016;
   --color-danger: #f07070;
-  --color-priority-low: #5fc48c;
-  --color-priority-medium: #e8b04a;
-  --color-priority-high: #f07070;
   --color-focus: rgb(123 145 255 / 0.5);
   --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.4);
   --shadow-md: 0 4px 16px rgb(0 0 0 / 0.35);

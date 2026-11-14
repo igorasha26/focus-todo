@@ -1,11 +1,10 @@
 import type { Task } from '../model/types';
-import { STORAGE_KEY, loadTasks, saveTasks } from './storage';
+import { FILTER_STORAGE_KEY, STORAGE_KEY, loadFilter, loadTasks, saveFilter, saveTasks } from './storage';
 
 const validTask: Task = {
   id: '1',
   title: 'Задача',
   completed: false,
-  priority: 'high',
   createdAt: 1_700_000_000_000,
 };
 
@@ -35,7 +34,6 @@ describe('storage', () => {
     ['a task without id', { ...validTask, id: undefined }],
     ['a task with an empty id', { ...validTask, id: '' }],
     ['a task with a wrong completed type', { ...validTask, completed: 'yes' }],
-    ['a task with an unknown priority', { ...validTask, priority: 'urgent' }],
     ['a task with a non-numeric createdAt', { ...validTask, createdAt: '2024-01-01' }],
   ])('drops an invalid entry and keeps the valid ones: %s', (_label, broken) => {
     const second: Task = { ...validTask, id: '2', title: 'Вторая' };
@@ -48,8 +46,21 @@ describe('storage', () => {
     expect(loadTasks()).toEqual([]);
   });
 
+  it('loads tasks saved earlier with the legacy priority field', () => {
+    const legacy = [
+      { ...validTask, priority: 'high' },
+      { ...validTask, id: '2', title: 'Старая', completed: true, priority: 'low' },
+    ];
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(legacy));
+
+    const loaded = loadTasks();
+    expect(loaded).toHaveLength(2);
+    expect(loaded[0]).toMatchObject(validTask);
+    expect(loaded[1]).toMatchObject({ id: '2', title: 'Старая', completed: true });
+  });
+
   it('round-trips saved tasks', () => {
-    const tasks: Task[] = [validTask, { ...validTask, id: '2', completed: true, priority: 'low' }];
+    const tasks: Task[] = [validTask, { ...validTask, id: '2', completed: true }];
     saveTasks(tasks);
     expect(localStorage.getItem(STORAGE_KEY)).toBe(JSON.stringify(tasks));
     expect(loadTasks()).toEqual(tasks);
@@ -68,6 +79,39 @@ describe('storage', () => {
       throw new Error('QuotaExceededError');
     });
     expect(() => saveTasks([validTask])).not.toThrow();
+    spy.mockRestore();
+  });
+});
+
+describe('filter storage', () => {
+  it('defaults to "all" when nothing is stored', () => {
+    expect(loadFilter()).toBe('all');
+  });
+
+  it.each(['urgent', '', '"active"', '{broken', 'ALL'])('falls back to "all" for an unknown value: %j', (raw) => {
+    localStorage.setItem(FILTER_STORAGE_KEY, raw);
+    expect(loadFilter()).toBe('all');
+  });
+
+  it.each(['all', 'active', 'completed'] as const)('round-trips "%s"', (filter) => {
+    saveFilter(filter);
+    expect(localStorage.getItem(FILTER_STORAGE_KEY)).toBe(filter);
+    expect(loadFilter()).toBe(filter);
+  });
+
+  it('falls back to "all" when localStorage throws on read', () => {
+    const spy = vi.spyOn(Storage.prototype, 'getItem').mockImplementation(() => {
+      throw new Error('SecurityError');
+    });
+    expect(loadFilter()).toBe('all');
+    spy.mockRestore();
+  });
+
+  it('does not throw when localStorage throws on write', () => {
+    const spy = vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
+      throw new Error('QuotaExceededError');
+    });
+    expect(() => saveFilter('active')).not.toThrow();
     spy.mockRestore();
   });
 });

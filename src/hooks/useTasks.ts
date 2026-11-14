@@ -1,13 +1,14 @@
 import { useCallback, useEffect, useReducer } from 'react';
 import { loadTasks, saveTasks } from '../lib/storage';
 import { tasksReducer } from '../model/tasksReducer';
-import type { Priority, Task } from '../model/types';
+import type { Task } from '../model/types';
 
 interface UseTasksResult {
   tasks: Task[];
-  addTask: (title: string, priority?: Priority) => void;
+  addTask: (title: string) => void;
   toggleTask: (id: string) => void;
   removeTask: (id: string) => void;
+  clearCompleted: () => void;
 }
 
 export function useTasks(): UseTasksResult {
@@ -17,10 +18,10 @@ export function useTasks(): UseTasksResult {
     saveTasks(tasks);
   }, [tasks]);
 
-  const addTask = useCallback((title: string, priority: Priority = 'medium') => {
+  const addTask = useCallback((title: string) => {
     dispatch({
       type: 'add',
-      payload: { id: crypto.randomUUID(), title, priority, createdAt: Date.now() },
+      payload: { id: crypto.randomUUID(), title, createdAt: Date.now() },
     });
   }, []);
 
@@ -32,5 +33,9 @@ export function useTasks(): UseTasksResult {
     dispatch({ type: 'remove', payload: { id } });
   }, []);
 
-  return { tasks, addTask, toggleTask, removeTask };
+  const clearCompleted = useCallback(() => {
+    dispatch({ type: 'clearCompleted' });
+  }, []);
+
+  return { tasks, addTask, toggleTask, removeTask, clearCompleted };
 }
