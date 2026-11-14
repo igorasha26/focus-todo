@@ -4,7 +4,6 @@ export type TasksAction =
   | { type: 'add'; payload: { id: string; title: string; createdAt: number } }
   | { type: 'toggle'; payload: { id: string } }
   | { type: 'remove'; payload: { id: string } }
-  | { type: 'reorder'; payload: { activeId: string; overId: string } }
   | { type: 'clearCompleted' };
 
 export function addTask(
@@ -36,24 +35,6 @@ export function removeTask(state: Task[], id: string): Task[] {
   return next.length === state.length ? state : next;
 }
 
-export function reorderTasks(state: Task[], activeId: string, overId: string): Task[] {
-  if (activeId === overId) {
-    return state;
-  }
-  const from = state.findIndex((task) => task.id === activeId);
-  const to = state.findIndex((task) => task.id === overId);
-  if (from === -1 || to === -1) {
-    return state;
-  }
-  const next = [...state];
-  const [moved] = next.splice(from, 1);
-  if (!moved) {
-    return state;
-  }
-  next.splice(to, 0, moved);
-  return next;
-}
-
 export function clearCompleted(state: Task[]): Task[] {
   const next = state.filter((task) => !task.completed);
   return next.length === state.length ? state : next;
@@ -67,8 +48,6 @@ export function tasksReducer(state: Task[], action: TasksAction): Task[] {
       return toggleTask(state, action.payload.id);
     case 'remove':
       return removeTask(state, action.payload.id);
-    case 'reorder':
-      return reorderTasks(state, action.payload.activeId, action.payload.overId);
     case 'clearCompleted':
       return clearCompleted(state);
     default: {

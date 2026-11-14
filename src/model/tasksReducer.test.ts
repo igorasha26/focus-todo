@@ -1,7 +1,6 @@
 import {
   addTask,
   clearCompleted,
-  reorderTasks,
   removeTask,
   tasksReducer,
   toggleTask,
@@ -65,25 +64,6 @@ describe('removeTask', () => {
   });
 });
 
-describe('reorderTasks', () => {
-  it('moves a task down', () => {
-    expect(reorderTasks(initial, 'a', 'c').map((t) => t.id)).toEqual(['b', 'c', 'a']);
-  });
-
-  it('moves a task up', () => {
-    expect(reorderTasks(initial, 'c', 'a').map((t) => t.id)).toEqual(['c', 'a', 'b']);
-  });
-
-  it('returns the same state when ids match', () => {
-    expect(reorderTasks(initial, 'b', 'b')).toBe(initial);
-  });
-
-  it('returns the same state when an id is unknown', () => {
-    expect(reorderTasks(initial, 'missing', 'a')).toBe(initial);
-    expect(reorderTasks(initial, 'a', 'missing')).toBe(initial);
-  });
-});
-
 describe('clearCompleted', () => {
   it('removes all completed tasks', () => {
     expect(clearCompleted(initial)).toEqual([a, c]);
@@ -103,9 +83,6 @@ describe('tasksReducer', () => {
 
     state = tasksReducer(state, { type: 'toggle', payload: { id: 'x' } });
     expect(state[1]?.completed).toBe(true);
-
-    state = tasksReducer(state, { type: 'reorder', payload: { activeId: 'y', overId: 'x' } });
-    expect(state.map((t) => t.id)).toEqual(['x', 'y']);
 
     state = tasksReducer(state, { type: 'clearCompleted' });
     expect(state.map((t) => t.id)).toEqual(['y']);
