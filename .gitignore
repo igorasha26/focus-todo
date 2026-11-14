@@ -6,3 +6,6 @@ CLAUDE.md
 coverage
 .idea/
 .DS_Store
+test-results/
+playwright-report/
+blob-report/

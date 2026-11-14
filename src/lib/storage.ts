@@ -24,6 +24,7 @@ export function saveTasks(tasks: Task[]): void {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
   } catch {
+    // localStorage недоступен — данные просто не сохранятся
   }
 }
 
@@ -40,6 +41,7 @@ export function saveFilter(filter: Filter): void {
   try {
     localStorage.setItem(FILTER_STORAGE_KEY, filter);
   } catch {
+    // localStorage недоступен — данные просто не сохранятся
   }
 }
 
@@ -56,5 +58,6 @@ export function saveTheme(theme: Theme): void {
   try {
     localStorage.setItem(THEME_STORAGE_KEY, theme);
   } catch {
+    // localStorage недоступен — данные просто не сохранятся
   }
 }
