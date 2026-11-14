@@ -1,4 +1,3 @@
-/* Modern reset */
 *,
 *::before,
 *::after {
@@ -76,7 +75,6 @@ h6 {
   isolation: isolate;
 }
 
-/* Visible keyboard focus */
 :focus-visible {
   outline: 2px solid var(--color-accent);
   outline-offset: 2px;
