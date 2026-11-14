@@ -1,0 +1,8 @@
+node_modules
+dist
+.env*
+CLAUDE.md
+.claude/
+coverage
+.idea/
+.DS_Store
